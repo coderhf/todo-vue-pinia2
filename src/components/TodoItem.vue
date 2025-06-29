@@ -12,6 +12,8 @@ const props = defineProps<{
 const todoStore = useTodoStore()
 const inputRef = ref<HTMLInputElement | null>(null)
 
+const inputText = ref<string>('')
+
 const labelId = useId()
 
 // 监听编辑索引变化，聚焦输入框
@@ -24,6 +26,19 @@ watch(() => todoStore.editingIndex, async (newIndex) => {
   }
 })
 
+function quashTodo() { // 撤销修改
+  // 如果输入框内容为空，则删除该 todo
+  if (inputText.value.trim() !== '') {
+    todoStore.editingIndex = -1 // 重置编辑索引
+    inputText.value = props.todo.text // 恢复原文本
+  }
+}
+
+function handleDblclick() {
+  todoStore.editingIndex = props.index // 设置编辑索引为当前索引
+  inputText.value = props.todo.text // 设置输入框文本为当前 todo 文本
+}
+
 </script>
 
 <template>
@@ -31,9 +46,9 @@ watch(() => todoStore.editingIndex, async (newIndex) => {
     [.completed-todo_&.active]:hidden [.active-todo_&.completed]:hidden">
     <label :for="labelId" class="flex items-center">
       <input type="checkbox" class="mr-2" v-model="todo.completed" />
-      <input type="text" ref="inputRef" name="" id="" v-if="index === todoStore.editingIndex" v-model="todo.text"
-        @blur="todoStore.editingIndex = -1" />
-      <span v-else class="text-gray-700" @dblclick="todoStore.editingIndex = index">{{ todo.text }}</span>
+      <input type="text" ref="inputRef" name="" id="" v-if="index === todoStore.editingIndex" v-model="inputText"
+        @blur="quashTodo" @keydown.esc="quashTodo" @keydown.enter="todoStore.updateTodo(todo.id, inputText)" />
+      <span v-else class="text-gray-700" @dblclick="handleDblclick">{{ todo.text }}</span>
       <button @click="todoStore.deleteTodo(todo.id)"
         class="ml-2 text-red-500 hover:text-red-700 bg-gray-500 p-2">X</button>
     </label>

@@ -52,6 +52,14 @@ export const useTodoStore = defineStore('todo', () => {
     todos.value = todos.value.filter(todo => !todo.completed)
   }
 
+  function updateTodo(id: number, text: string) {
+    const todo = todos.value.find(todo => todo.id === id)
+    if (todo) {
+      todo.text = text
+      editingIndex.value = -1 // 清除编辑状态
+    }
+  }
+
 
   return {
     todos,
@@ -62,6 +70,7 @@ export const useTodoStore = defineStore('todo', () => {
     addTodo,
     toggleAll,
     deleteTodo,
-    clearCompleted
+    clearCompleted,
+    updateTodo,
   }
 })
